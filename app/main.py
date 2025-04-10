@@ -23,6 +23,8 @@ app.mount("/dataset", StaticFiles(directory="dataset"), name="dataset")
 
 # Configure Jinja2 templates
 templates = Jinja2Templates(directory="app/templates")
+# Add this line to set up a global template variable
+templates.env.globals["static_path"] = "/static"
 
 # Load predictions
 predictions_df = pd.read_csv("predictions.csv", header=None, names=["image", "prediction"])

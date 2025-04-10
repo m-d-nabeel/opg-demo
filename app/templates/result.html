@@ -241,7 +241,7 @@
                         </svg>
                         Review Masks
                     </button>
-                    <button onclick="toggleImage(true)" class="btn-3d bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2 rounded-xl font-medium shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center">
+                    <button onclick="toggleCompareView()" class="btn-3d bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2 rounded-xl font-medium shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
@@ -251,6 +251,51 @@
                 </div>
                 {% endif %}
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image comparison modal -->
+<div id="comparison-modal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+        <div class="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-2xl flex items-center justify-between">
+            <h3 class="text-xl font-bold text-white">Image Comparison View</h3>
+            <button onclick="toggleCompareView()" class="text-white hover:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="p-6">
+            <p class="text-gray-700 mb-4">Drag the slider to compare the original image and the masked image.</p>
+            
+            <div class="comparison-container">
+                <div class="comparison-wrapper relative h-[500px] border-2 border-gray-200 rounded-xl overflow-hidden">
+                    <img id="compare-original" src="/image/{{ image_file }}" alt="Original image" class="absolute top-0 left-0 w-full h-full object-contain">
+                    <img id="compare-masked" src="/masked-image/{{ image_file }}" alt="Masked image" class="absolute top-0 left-0 w-full h-full object-contain clip-path">
+                    
+                    <div id="slider" class="absolute top-0 bottom-0 w-2 bg-white shadow-md cursor-ew-resize flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center z-10 border-2 border-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M9.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-3">
+                    <div class="py-1 px-3 bg-indigo-100 text-indigo-800 rounded-lg text-sm">Original Image</div>
+                    <div class="py-1 px-3 bg-purple-100 text-purple-800 rounded-lg text-sm">Masked Image</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-gray-200 flex justify-end">
+            <button onclick="toggleCompareView()" class="btn-3d bg-white border-2 border-gray-300 text-gray-700 px-5 py-2 rounded-xl font-medium shadow-md transition-all duration-300 transform hover:scale-105 flex items-center">
+                Close Comparison
+            </button>
         </div>
     </div>
 </div>
@@ -345,6 +390,15 @@
     50% { filter: brightness(1); }
     75% { filter: brightness(1.2); }
     100% { filter: brightness(1); }
+}
+
+/* Add to existing styles */
+.clip-path {
+    clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+}
+
+.comparison-wrapper {
+    user-select: none;
 }
 </style>
 
@@ -531,18 +585,94 @@
         setActiveStep(1);
     });
     
-    // Image toggle function - No longer needed but keeping for reference
-    function toggleImage(showMask) {
-        const originalImage = document.getElementById('original-image');
-        const maskedImage = document.getElementById('masked-image');
+    // Toggle image comparison modal
+    function toggleCompareView() {
+        const modal = document.getElementById('comparison-modal');
         
-        if (showMask) {
-            originalImage.classList.add('hidden');
-            maskedImage.classList.remove('hidden');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Initialize slider position at 50%
+            const slider = document.getElementById('slider');
+            const container = slider.parentElement;
+            const initialX = container.offsetWidth / 2;
+            
+            slider.style.left = initialX + 'px';
+            updateClipPath(initialX);
+            
+            // Initialize drag functionality after modal is shown
+            initializeSlider();
         } else {
-            originalImage.classList.remove('hidden');
-            maskedImage.classList.add('hidden');
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
         }
+    }
+    
+    // Initialize slider drag functionality
+    function initializeSlider() {
+        const slider = document.getElementById('slider');
+        const container = slider.parentElement;
+        
+        let isDragging = false;
+        
+        // Mouse events
+        slider.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+        
+        // Touch events
+        slider.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', endDrag);
+        
+        function startDrag(e) {
+            isDragging = true;
+            e.preventDefault();
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const containerRect = container.getBoundingClientRect();
+            let clientX;
+            
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+            } else {
+                clientX = e.clientX;
+            }
+            
+            let newX = clientX - containerRect.left;
+            
+            // Constrain within bounds
+            if (newX < 0) newX = 0;
+            if (newX > containerRect.width) newX = containerRect.width;
+            
+            // Update slider position
+            slider.style.left = newX + 'px';
+            
+            // Update clip path
+            updateClipPath(newX);
+        }
+        
+        function endDrag() {
+            isDragging = false;
+        }
+    }
+    
+    // Update the clip path of the masked image
+    function updateClipPath(sliderX) {
+        const container = document.getElementById('slider').parentElement;
+        const maskedImage = document.getElementById('compare-masked');
+        
+        const percentage = (sliderX / container.offsetWidth) * 100;
+        maskedImage.style.clipPath = `polygon(${percentage}% 0, 100% 0, 100% 100%, ${percentage}% 100%)`;
+    }
+    
+    // Old toggle function - replaced with modal approach
+    function toggleImage(showMask) {
+        toggleCompareView();
     }
 </script>
 {% endblock %} 
