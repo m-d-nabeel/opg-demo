@@ -1,0 +1,120 @@
+/* Tailwind components */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom components */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-indigo-600 text-white hover:bg-indigo-700;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-md overflow-hidden;
+}
+
+.input-select {
+  @apply block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-in-out;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-2 w-full bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-value {
+  @apply h-full bg-indigo-600 transition-all duration-300;
+}
+
+/* Results */
+.result-correct {
+  @apply text-green-600 font-bold;
+}
+
+.result-incorrect {
+  @apply text-red-600 font-bold;
+}
+
+/* Image container */
+.image-container {
+  @apply relative w-full max-w-md mx-auto rounded-xl overflow-hidden shadow-lg;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  @apply relative inline-block w-12 h-6;
+}
+
+.toggle-switch input {
+  @apply opacity-0 w-0 h-0;
+}
+
+.toggle-slider {
+  @apply absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 transition-all duration-300 rounded-full;
+}
+
+.toggle-slider:before {
+  @apply absolute content-[''] h-4 w-4 left-1 bottom-1 bg-white transition-all duration-300 rounded-full;
+}
+
+input:checked + .toggle-slider {
+  @apply bg-indigo-600;
+}
+
+input:checked + .toggle-slider:before {
+  @apply transform translate-x-6;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip .tooltip-text {
+  @apply invisible w-48 bg-gray-900 text-white text-center rounded-lg py-2 px-4 absolute z-10 bottom-full left-1/2 transform -translate-x-1/2 mb-1 opacity-0 transition-opacity duration-200;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
+
+/* Stats counter */
+.stat-counter {
+  @apply text-2xl font-bold;
+} 
