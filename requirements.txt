@@ -1,1 +1,8 @@
 colorama
+pandas
+uvicorn
+opencv-python
+pillow
+fastapi
+jinja2
+python-multipart
