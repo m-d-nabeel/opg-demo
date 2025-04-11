@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 # This script sets up the environment for the project.
 # It installs the required packages and sets up the virtual environment.
 
@@ -25,10 +25,21 @@ if [ ! -d "venv" ]; then
 else
     echo "Virtual environment already exists."
 fi
-source venv/bin/activate
+
+# Make the script work with both bash and zsh
+if [ -n "$BASH_VERSION" ] || [ -n "$ZSH_VERSION" ]; then
+    SCRIPT_PATH="${BASH_SOURCE[0]:-$0}"
+    SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+    # Use POSIX-compatible approach for sourcing virtual environment
+    . "$SCRIPT_DIR/venv/bin/activate"
+else
+    # For other shells
+    source venv/bin/activate
+fi
+
 echo "Installing required packages..."
 pip install -r requirements.txt
 echo "Environment setup complete."
-echo "To activate the virtual environment, run 'source venv/bin/activate'."
-echo "To deactivate the virtual environment, run 'deactivate'."
-echo "To run the project, use 'python run.py'."
+echo "To activate the virtual environment, run: source venv/bin/activate"
+echo "To deactivate the virtual environment, run: deactivate"
+echo "To run the project, use: python run.py"
